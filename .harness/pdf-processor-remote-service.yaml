@@ -1,0 +1,53 @@
+service:
+  name: pdf-processor-remote-service
+  identifier: pdfprocessorremoteservice
+  serviceDefinition:
+    type: Kubernetes
+    spec:
+      manifests:
+        - manifest:
+            identifier: pdfprocessorremotemanifest
+            type: HelmChart
+            spec:
+              store:
+                type: Github
+                spec:
+                  connectorRef: pdfprocessor
+                  gitFetchType: Branch
+                  folderPath: deploy/helm/pdf-service
+                  branch: main
+              subChartPath: ""
+              valuesPaths:
+                - deploy/harness/values.yaml
+              optionalValuesYaml: false
+              skipResourceVersioning: false
+              enableDeclarativeRollback: false
+              helmVersion: V3
+              fetchHelmChartMetadata: false
+        - manifest:
+            identifier: pdfprocessormanifestoverride
+            type: Values
+            spec:
+              store:
+                type: Github
+                spec:
+                  connectorRef: pdfprocessor
+                  gitFetchType: Branch
+                  paths:
+                    - " deploy/harness/values.yaml"
+                  branch: main
+              optionalValuesYaml: false
+      artifacts:
+        primary:
+          primaryArtifactRef: <+input>
+          sources:
+            - spec:
+                connectorRef: pdfservice
+                imagePath: dtacci/pdf-service
+                tag: <+input>
+                digest: ""
+              identifier: pdfprocessorartifactsource
+              type: DockerRegistry
+  gitOpsEnabled: false
+  orgIdentifier: default
+  projectIdentifier: default_project
