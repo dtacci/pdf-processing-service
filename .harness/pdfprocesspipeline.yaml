@@ -67,15 +67,7 @@ pipeline:
         spec:
           deploymentType: Kubernetes
           service:
-            serviceRef: pdfprocessorCDservice
-            serviceInputs:
-              serviceDefinition:
-                type: Kubernetes
-                spec:
-                  artifacts:
-                    primary:
-                      primaryArtifactRef: <+input>
-                      sources: <+input>
+            serviceRef: pdfprocessorservice
           environment:
             environmentRef: pdfdev
             gitBranch: main
