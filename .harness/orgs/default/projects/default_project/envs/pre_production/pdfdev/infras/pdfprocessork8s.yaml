@@ -1,0 +1,13 @@
+infrastructureDefinition:
+  name: pdf-processor-k8s
+  identifier: pdfprocessork8s
+  orgIdentifier: default
+  projectIdentifier: default_project
+  environmentRef: pdfdev
+  deploymentType: Kubernetes
+  type: KubernetesDirect
+  spec:
+    connectorRef: pdfprocessork8scluster
+    namespace: pdfprocessork8scluster
+    releaseName: release-<+INFRA_KEY_SHORT_ID>
+  allowSimultaneousDeployments: false
