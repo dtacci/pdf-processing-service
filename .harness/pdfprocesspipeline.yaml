@@ -8,6 +8,7 @@ pipeline:
   properties:
     ci:
       codebase:
+        connectorRef: pdfprocessor
         repoName: pdf-processing-service
         build: <+input>
   stages:
