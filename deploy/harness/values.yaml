@@ -1,0 +1,12 @@
+# Harness deploy-time values override.
+#
+# Applied ON TOP of the chart's own values.yaml at deploy time. Its only job is
+# to inject the image tag of the artifact Harness is deploying (the CI-built
+# commit-SHA tag) into the chart's image.tag.
+#
+# Kept OUT of the chart (deploy/helm/pdf-service) on purpose: the chart stays
+# standalone and Harness-agnostic, so `helm template` / local installs still
+# work without resolving Harness expressions. The chart's values.yaml already
+# pins image.repository to docker.io/dtacci/pdf-service; only the tag is dynamic.
+image:
+  tag: <+artifact.tag>
