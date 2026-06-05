@@ -131,7 +131,7 @@ Prometheus `ServiceMonitor`. Deploy by **immutable git-SHA tag** (never
 
 ```bash
 helm upgrade --install pdf-service deploy/helm/pdf-service \
-  --set image.repository=docker.io/youruser/pdf-service \
+  --set image.repository=docker.io/dtacci/pdf-service \
   --set image.tag=$(git rev-parse --short HEAD)
 
 kubectl port-forward svc/pdf-service 8080:80

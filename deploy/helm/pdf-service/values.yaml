@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: docker.io/yourusername/pdf-service
+  repository: docker.io/dtacci/pdf-service
   # Deploy by immutable git-SHA tag (set by the pipeline: --set image.tag=$GIT_SHA).
   # Never ":latest" — canary/rollback requires two distinguishable versions.
   tag: ""            # defaults to .Chart.AppVersion if empty

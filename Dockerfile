@@ -37,7 +37,7 @@ LABEL org.opencontainers.image.title="pdf-service" \
       org.opencontainers.image.version="${APP_VERSION}" \
       org.opencontainers.image.revision="${GIT_SHA}" \
       org.opencontainers.image.created="${BUILD_TIME}" \
-      org.opencontainers.image.source="https://github.com/yourusername/pdf-service"
+      org.opencontainers.image.source="https://github.com/dtacci/pdf-processing-service"
 
 # Create an unprivileged user to run the app.
 RUN groupadd --system app && useradd --system --gid app --no-create-home app
