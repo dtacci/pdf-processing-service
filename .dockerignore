@@ -9,14 +9,23 @@ README.md
 tests/
 requirements-dev.txt
 
-# Kubernetes manifests are deploy-time, not build-time.
-k8s/
+# Deploy-time / CI-time only — not part of the runtime image.
+deploy/
+scripts/
+Makefile
+pyproject.toml
+.harness/
 
 # Python caches / virtualenvs / build artifacts.
 __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+sbom.cdx.json
 .venv/
 venv/
 .env

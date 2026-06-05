@@ -1,0 +1,75 @@
+replicaCount: 2
+
+image:
+  repository: docker.io/yourusername/pdf-service
+  # Deploy by immutable git-SHA tag (set by the pipeline: --set image.tag=$GIT_SHA).
+  # Never ":latest" — canary/rollback requires two distinguishable versions.
+  tag: ""            # defaults to .Chart.AppVersion if empty
+  # Optional: pin by digest for full immutability (--set image.digest=sha256:...).
+  digest: ""
+  pullPolicy: IfNotPresent
+
+# Surfaced to the app (and to /version) so a rollout can prove what is running.
+appVersion: ""       # defaults to image.tag
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
+
+# Hardened by default. The app writes nothing to disk, so the root FS is
+# read-only; /tmp is an emptyDir for anything libc/uvicorn may need.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  fsGroup: 999
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# Three distinct probes: startup gates the others, liveness restarts a wedged
+# process, readiness gates traffic (and canary promotion).
+probes:
+  startup:
+    path: /health
+    failureThreshold: 30
+    periodSeconds: 2
+  liveness:
+    path: /health
+    initialDelaySeconds: 0
+    periodSeconds: 15
+  readiness:
+    path: /readyz
+    periodSeconds: 10
+
+# Keep at least one pod available during voluntary disruptions / rollouts.
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+# Prometheus Operator scrape config — feeds the metrics that drive canary
+# verification. Enable when the Prometheus Operator CRDs are present.
+serviceMonitor:
+  enabled: false
+  interval: 15s
+  path: /metrics

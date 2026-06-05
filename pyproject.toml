@@ -1,0 +1,41 @@
+# Single source of truth for tooling config. Each tool here maps to one CI gate
+# (see the Makefile), so the pipeline stays a thin orchestration layer.
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, isort, bugbear, pyupgrade, comprehensions.
+select = ["E", "F", "I", "B", "UP", "C4"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI dependency injection legitimately calls these in argument defaults.
+extend-immutable-calls = ["fastapi.File", "fastapi.Form", "fastapi.Depends", "fastapi.Query"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+files = ["app"]
+
+# Third-party libs without bundled type stubs — don't fail the gate on them.
+[[tool.mypy.overrides]]
+module = ["pypdf.*", "reportlab.*", "prometheus_fastapi_instrumentator.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+# CI fails the gate below this line coverage.
+fail_under = 85
+exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:"]

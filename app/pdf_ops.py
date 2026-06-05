@@ -8,7 +8,7 @@ and without touching the filesystem or network.
 from __future__ import annotations
 
 import io
-from typing import Iterable
+from collections.abc import Iterable
 
 from pypdf import PdfReader, PdfWriter
 
@@ -44,7 +44,7 @@ def parse_page_range(spec: str, page_count: int) -> list[int]:
             else:
                 start = end = int(part)
         except ValueError:
-            raise ValueError(f"Invalid page range segment: {part!r}")
+            raise ValueError(f"Invalid page range segment: {part!r}") from None
 
         if start < 1 or end < start or end > page_count:
             raise ValueError(
@@ -95,6 +95,5 @@ def extract_text(data: bytes) -> list[dict]:
     """Extract text per page. Returns a list of ``{"page": n, "text": str}``."""
     reader = PdfReader(io.BytesIO(data))
     return [
-        {"page": i + 1, "text": page.extract_text() or ""}
-        for i, page in enumerate(reader.pages)
+        {"page": i + 1, "text": page.extract_text() or ""} for i, page in enumerate(reader.pages)
     ]

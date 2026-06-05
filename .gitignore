@@ -2,9 +2,18 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
 .venv/
 venv/
+*-venv/
 .env
+
+# Test / build artifacts
+.coverage
+coverage.xml
+sbom.cdx.json
+
 .DS_Store
 
 # Stray screenshots / scratch files not part of the app
