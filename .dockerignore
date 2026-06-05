@@ -1,0 +1,28 @@
+# Keep the build context (and final image) small.
+.git
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+
+# Tests and dev-only deps never belong in the runtime image.
+tests/
+requirements-dev.txt
+
+# Kubernetes manifests are deploy-time, not build-time.
+k8s/
+
+# Python caches / virtualenvs / build artifacts.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.env
+
+# Editor / OS noise.
+.vscode/
+.idea/
+.DS_Store
+*.png

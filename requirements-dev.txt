@@ -1,0 +1,5 @@
+# Dev/test dependencies. NOT installed into the production image.
+-r requirements.txt
+pytest==8.3.4
+httpx==0.28.1            # FastAPI TestClient transport
+reportlab==4.2.5         # generates in-memory PDF fixtures for tests
