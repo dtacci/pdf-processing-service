@@ -9,9 +9,8 @@ from __future__ import annotations
 import io
 
 import pytest
-from pypdf import PdfReader
-
 from app import pdf_ops
+from pypdf import PdfReader
 
 
 def _page_count(data: bytes) -> int:
@@ -41,3 +40,30 @@ def test_extract_text_reads_content(one_page_pdf):
 def test_split_rejects_out_of_range(three_page_pdf):
     with pytest.raises(ValueError):
         pdf_ops.split_pdf(three_page_pdf, "1-9")
+
+
+def test_split_single_page_and_comma_list(three_page_pdf):
+    assert _page_count(pdf_ops.split_pdf(three_page_pdf, "2")) == 1
+    assert _page_count(pdf_ops.split_pdf(three_page_pdf, "1,3")) == 2
+
+
+def test_parse_page_range_forms():
+    assert pdf_ops.parse_page_range("2", 3) == [1]
+    assert pdf_ops.parse_page_range("1-3", 3) == [0, 1, 2]
+    assert pdf_ops.parse_page_range("1-2,3", 3) == [0, 1, 2]
+
+
+def test_parse_page_range_rejects_malformed():
+    with pytest.raises(ValueError, match="Invalid page range segment"):
+        pdf_ops.parse_page_range("abc", 3)
+
+
+def test_parse_page_range_rejects_empty_selection():
+    with pytest.raises(ValueError, match="No pages selected"):
+        pdf_ops.parse_page_range(" , ", 3)
+
+
+def test_compress_preserves_pages_and_returns_valid_pdf(three_page_pdf):
+    out = pdf_ops.compress_pdf(three_page_pdf)
+    assert out[:4] == b"%PDF"
+    assert _page_count(out) == 3

@@ -1,0 +1,8 @@
+apiVersion: v2
+name: pdf-service
+description: FastAPI microservice for basic PDF operations
+type: application
+# Chart version is independent of the app version; the app version is set per
+# release by the pipeline (--set image.tag / appVersion).
+version: 0.1.0
+appVersion: "1.0.0"

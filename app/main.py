@@ -7,9 +7,15 @@ import io
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
-from app import pdf_ops
+from app import observability, pdf_ops
+from app.config import get_settings
 
-app = FastAPI(title="PDF Processing Service", version="1.0.0")
+settings = get_settings()
+observability.setup_logging(settings.log_level)
+
+app = FastAPI(title="PDF Processing Service", version=settings.app_version)
+app.add_middleware(observability.RequestContextMiddleware)
+observability.instrument(app)  # exposes /metrics
 
 
 INDEX_HTML = """<!doctype html>
@@ -18,7 +24,8 @@ INDEX_HTML = """<!doctype html>
   <meta charset="utf-8">
   <title>PDF Processing Service</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; padding: 0 1rem; }
+    body { font-family: system-ui, sans-serif; max-width: 640px;
+           margin: 2rem auto; padding: 0 1rem; }
     fieldset { margin-bottom: 1.25rem; border: 1px solid #ccc; border-radius: 8px; }
     legend { font-weight: 600; }
     button { padding: .4rem .8rem; }
@@ -82,8 +89,30 @@ def index() -> str:
 
 @app.get("/health")
 def health() -> dict:
-    """Liveness/readiness probe target for Kubernetes."""
+    """Liveness probe target — is the process up and serving?"""
     return {"status": "ok"}
+
+
+@app.get("/readyz")
+def readyz() -> dict:
+    """Readiness probe target — is the app ready to take traffic?
+
+    Stateless today (no upstream deps), so readiness == liveness. Kept as a
+    distinct endpoint so dependency checks (DB, cache, …) can be added here
+    later without disturbing the liveness signal.
+    """
+    return {"status": "ready"}
+
+
+@app.get("/version")
+def version() -> dict:
+    """Build provenance baked into the image — lets a rollout prove *which*
+    build is serving on each pod during a canary."""
+    return {
+        "version": settings.app_version,
+        "git_sha": settings.git_sha,
+        "build_time": settings.build_time,
+    }
 
 
 @app.post("/merge")
@@ -94,7 +123,7 @@ async def merge(files: list[UploadFile] = File(...)) -> StreamingResponse:
     try:
         merged = pdf_ops.merge_pdfs(streams)
     except Exception as exc:  # malformed PDF -> client error
-        raise HTTPException(status_code=400, detail=f"Failed to merge PDFs: {exc}")
+        raise HTTPException(status_code=400, detail=f"Failed to merge PDFs: {exc}") from exc
     return _pdf_response(merged, "merged.pdf")
 
 
@@ -107,9 +136,9 @@ async def split(
     try:
         result = pdf_ops.split_pdf(data, pages)
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to split PDF: {exc}")
+        raise HTTPException(status_code=400, detail=f"Failed to split PDF: {exc}") from exc
     return _pdf_response(result, "split.pdf")
 
 
@@ -119,7 +148,7 @@ async def compress(file: UploadFile = File(...)) -> StreamingResponse:
     try:
         result = pdf_ops.compress_pdf(data)
     except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to compress PDF: {exc}")
+        raise HTTPException(status_code=400, detail=f"Failed to compress PDF: {exc}") from exc
     return _pdf_response(result, "compressed.pdf")
 
 
@@ -129,5 +158,5 @@ async def extract_text(file: UploadFile = File(...)) -> JSONResponse:
     try:
         pages = pdf_ops.extract_text(data)
     except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Failed to extract text: {exc}")
+        raise HTTPException(status_code=400, detail=f"Failed to extract text: {exc}") from exc
     return JSONResponse({"pages": pages})

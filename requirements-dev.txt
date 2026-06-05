@@ -1,5 +1,8 @@
 # Dev/test dependencies. NOT installed into the production image.
 -r requirements.txt
 pytest==8.3.4
+pytest-cov==7.1.0        # coverage measurement + CI coverage gate
 httpx==0.28.1            # FastAPI TestClient transport
 reportlab==4.2.5         # generates in-memory PDF fixtures for tests
+ruff==0.15.16            # lint + format check (CI gate)
+mypy==2.1.0              # static type check (CI gate)
