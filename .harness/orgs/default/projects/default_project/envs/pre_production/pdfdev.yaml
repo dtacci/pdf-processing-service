@@ -1,0 +1,8 @@
+environment:
+  name: pdf-dev
+  identifier: pdfdev
+  description: ""
+  tags: {}
+  type: PreProduction
+  orgIdentifier: default
+  projectIdentifier: default_project
