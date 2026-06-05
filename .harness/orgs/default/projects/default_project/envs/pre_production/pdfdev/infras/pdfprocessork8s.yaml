@@ -8,6 +8,6 @@ infrastructureDefinition:
   type: KubernetesDirect
   spec:
     connectorRef: pdfprocessork8scluster
-    namespace: pdfprocessork8scluster
+    namespace: pdf-pro-k8s
     releaseName: release-<+INFRA_KEY_SHORT_ID>
   allowSimultaneousDeployments: false
