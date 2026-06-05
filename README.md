@@ -121,6 +121,22 @@ make build GIT_SHA=$(git rev-parse --short HEAD) APP_VERSION=1.0.0
 curl http://localhost:8000/version   # -> {"version":"1.0.0","git_sha":"...","build_time":"..."}
 ```
 
+### Build provenance in CI (required)
+
+The image accepts three build args — `GIT_SHA`, `APP_VERSION`, `BUILD_TIME` —
+which populate `/version` and the OCI image labels. **A CI build-and-push step
+must pass these**, or `/version` reports `"unknown"` and the provenance is
+hollow. In Harness CI (Build and Push to Docker Registry → Build Arguments):
+
+| Build arg     | Value                       |
+|---------------|-----------------------------|
+| `GIT_SHA`     | `<+codebase.commitSha>`     |
+| `APP_VERSION` | release version, e.g. `1.0.0` |
+| `BUILD_TIME`  | optional ISO-8601 timestamp |
+
+Push with the commit SHA as the image tag (`dtacci/pdf-service:<+codebase.commitSha>`)
+so the build is deployable and rollback-able by immutable version.
+
 ## Kubernetes (Helm)
 
 The chart in `deploy/helm/pdf-service` is hardened (non-root, read-only root FS,
