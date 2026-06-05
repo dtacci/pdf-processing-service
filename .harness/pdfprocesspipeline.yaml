@@ -56,5 +56,6 @@ pipeline:
                     buildArgs:
                       APP_VERSION: 1.0.0
                       GIT_SHA: <+codebase.commitSha>
+                      BUILD_TIME: <+pipeline.startTs>
                     baseImageConnectorRefs:
                       - pdfservice
